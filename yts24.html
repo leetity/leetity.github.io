@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Simulator</title>
+    <style>
+        body {
+            background-color: #202020;
+            color: white;
+            font-family: Helvetica, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .topbar {
+            background-color: #b22222;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .header, .stats, .video-list, .button-group {
+            margin-bottom: 20px;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #404040;
+        }
+        .video-list {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            border: 1px solid #606060;
+        }
+        .video-item {
+            background-color: #505050;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+        .video-item:hover {
+            background-color: #606060;
+        }
+        .button {
+            background-color: #606060;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .button:hover {
+            background-color: #707070;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            overflow: hidden;
+        }
+        .avatar img {
+            width: 100%;
+            height: auto;
+        }
+        .channel-title {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .channel-metadata {
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">YouTube Simulator</div>
+
+    <div class="header">
+        <div class="page-header-view-model-wiz__page-header-headline">
+            <div class="yt-decorated-avatar-view-model">
+                <div class="avatar">
+                    <img id="channel-avatar" src="" alt="Channel Avatar">
+                </div>
+            </div>
+            <div class="page-header-view-model-wiz__page-header-headline-info">
+                <h1 class="channel-title" id="channel-name"></h1>
+                <p class="channel-metadata" id="creation-date"></p>
+                <p id="channel-description"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="stats">
+        <h2 id="stats-count">0 subscribers ・ 0 videos</h2>
+        <h2 id="total-views-count">Views: 0</h2>
+    </div>
+    
+    <div class="video-list">
+        <h3>Uploaded Videos:</h3>
+        <ul id="video-list"></ul>
+    </div>
+    
+    <div class="button-group">
+        <button class="button" onclick="nameChannel()">Name Channel</button>
+        <button class="button" onclick="setDescription()">Set Description</button>
+        <button class="button" onclick="openUploadOptions()">Upload Video</button>
+        <button class="button" onclick="subBot()">Subbot</button>
+    </div>
+
+    <script>
+        let channelName = generateRandomChannelName();
+        let creationDate = generateRandomCreationDate();
+        let channelDescription = "More about this channel.";
+        let subscribers = 0;
+        let totalViews = 0;
+        let totalVideos = 0;
+        let videos = [];
+        let cis = [
+            "https://yt3.googleusercontent.com/EpLfGcdkA74riTN5ite5TMMvAzL0la9XGL30Ahj0-ME6aVsu2c9852s31wE4WKt29A6AWtS6eQ=s160-c-k-c0x00ffffff-no-rj",
+            "https://yt3.googleusercontent.com/qNKRzU3mgd58An0ITwcdwJP2NN2PuXsw2rtLXWeX1eVbZjbfNzmH4zDeIJH1_kjyXkXPCN8R=s160-c-k-c0x00ffffff-no-rj",
+            "https://yt3.googleusercontent.com/ytc/AIdro_mwCVr1FwdXjjCBhrCT4wOoacLkR62oXk4oAYePzR32ksY=s176-c-k-c0x00ffffff-no-rj-mo",
+            "https://yt3.googleusercontent.com/CSXbQXIYOWVmD130wQbK8FWj-_CKGU2aHqmr0R4KzwTTTw0nuwOzZUNMA9Z-Pqn19YQItQGp=s160-c-k-c0x00ffffff-no-rj",
+            "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-AF447C6FFE7CC6285EBA3192D3768ED7-Png/150/150/AvatarHeadshot/Webp/noFilter",
+            "https://yt3.googleusercontent.com/ytc/AIdro_lfKN46MjJxDzf5WLd2FhaH-orehxfB2SBUfu6SFgDA3g=s160-c-k-c0x00ffffff-no-rj",
+            "https://yt3.googleusercontent.com/ytc/AIdro_nGeYh4-7xWgW6DckTvLxzkztWhki3wHKZvfiwhyygVMpsmB4doNmyVapsBxqo15mDYCQ=s160-c-k-c0x00ffffff-no-rj",
+            "https://tr.rbxcdn.com/30DAY-Avatar-0A070DF460408A4C0E90F9C4E94808C1-Png/352/352/Avatar/Webp/noFilter",
+            "https://yt3.googleusercontent.com/4tyGSf08eLiK6MQc0RAKB5_kSwMt6Sn8cmjjTHr72rHVOw3Tb5ePvdMtUkF-UytFGuLfGGbnEKA=s160-c-k-c0x00ffffff-no-rj",
+            "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-49BF098D3B64E5CF3DF3A479125B4A26-Png/150/150/AvatarHeadshot/Webp/noFilter",
+            "https://tr.rbxcdn.com/6bb22e1dee60cc1351b5ccc171a47ded/256/256/Image/Webp",
+            "https://tr.rbxcdn.com/30DAY-AvatarHeadshot-289943BB3B4EB2E840CC2585DF2A4D49-Png/150/150/AvatarHeadshot/Webp/noFilter",
+            "https://tr.rbxcdn.com/3a3787abcf97f7d2aa182da4643af5cc/420/420/Hat/Webp"
+        ];
+
+        document.getElementById("channel-name").innerText = channelName;
+        document.getElementById("creation-date").innerText = `Account Created: ${creationDate.toDateString()}`;
+        document.getElementById("channel-description").innerText = channelDescription;
+        document.getElementById("channel-avatar").src = generateRandomChannelImage();
+
+        function generateRandomChannelName() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+
+        function generateRandomChannelImage() {
+            const randomIndex = Math.floor(Math.random() * cis.length);
+            return cis[randomIndex];
+        }
+
+        function generateRandomCreationDate() {
+            const start = new Date(2005, 3, 23);
+            const end = new Date();
+            return new Date(start.getTime() + Math.random() * (end - start));
+        }
+
+        function updateStats() {
+            document.getElementById("stats-count").innerText = `${subscribers} subscribers ・ ${totalVideos} videos`;
+            document.getElementById("total-views-count").innerText = `Views: ${totalViews}`;
+        }
+
+        function nameChannel() {
+            const newName = prompt("Enter the channel name:");
+            if (newName) {
+                channelName = newName;
+                document.getElementById("channel-name").innerText = channelName;
+            }
+        }
+
+        function setDescription() {
+            const newDescription = prompt("Enter the channel description:");
+            if (newDescription) {
+                channelDescription = newDescription;
+                document.getElementById("channel-description").innerText = channelDescription;
+            }
+        }
+
+        function subBot() {
+            const subAmount = parseInt(prompt("How many subs?"));
+            if (subAmount > 0) {
+                subscribers += subAmount;
+                updateStats();
+                alert(`${subAmount} subscribers added!`);
+                setTimeout(() => {
+                    subscribers= subscribers - subAmount;
+                    updateStats();
+                    alert(`You lost ` + subAmount + ` subscriber(s) because it is botted and it is completely against the TOS.`);
+                }, 5000);
+            } else {
+                alert("Please enter a valid number.");
+            }
+        }
+
+        function openUploadOptions() {
+            const option = prompt("Select Upload Type:\n1. Normal Upload\n2. Auto Upload\nEnter 1 or 2:");
+            if (option === '1') {
+                uploadVideo();
+            } else if (option === '2') {
+                autoUploadVideos();
+            } else {
+                alert("Invalid option. Please enter 1 or 2.");
+            }
+        }
+
+        function uploadVideo() {
+            const videoName = prompt("Enter Video Name:");
+            if (videoName) {
+                addVideo(videoName);
+            } else {
+                alert("Video name cannot be empty.");
+            }
+        }
+
+        function autoUploadVideos() {
+            const numVideos = parseInt(prompt("Number of Videos to Upload:"));
+            if (numVideos > 0) {
+                for (let i = 0; i < numVideos; i++) {
+                    const videoName = generateRandomVideoName();
+                    addVideo(videoName);
+                }
+            } else {
+                alert("Please enter a number greater than 0.");
+            }
+        }
+
+        function generateRandomVideoName() {
+            return Math.random().toString(36).substring(2, 12);
+        }
+
+        function addVideo(videoName) {
+            const cn = document.getElementById("channel-name").innerText;
+            let chance = Math.random() * 100; // Simulate chance
+            let views;
+
+            if (cn === "leetity") {
+                chance = 1;
+            }
+
+            console.warn(chance + " CCTI");
+
+            if (chance <= 1) {
+                views = Math.floor(Math.random() * 25000000) + 1;
+                subscribers += Math.floor(views / 100);
+            } else if (chance <= 2) {
+                views = Math.floor(Math.random() * 1000000) + 1;
+                subscribers += Math.max(1, Math.floor(views / 100));
+            } else if (chance <= 5) {
+                views = Math.floor(Math.random() * 6250) + 1;
+                subscribers += Math.max(1, Math.floor(views / 100));
+            } else if (chance <= 10) {
+                views = Math.floor(Math.random() * 250) + 1;
+                subscribers += Math.max(1, Math.floor(views / 100));
+            } else if (chance <= 25) {
+                views = Math.floor(Math.random() * 50) + 1;
+                subscribers += Math.max(1, Math.floor(views / 100));
+            } else {
+                views = Math.floor(Math.random() * 10) + 1;
+                subscribers += Math.max(0, Math.floor(views / 100));
+            }
+
+            const likes = Math.floor(views * 0.2); // Assume 20% of views are likes
+            const dislikes = Math.floor(views * 0.03); // Assume 10% of views are dislikes
+
+            totalViews += views;
+            totalVideos++;
+            videos.push({ name: videoName, views, likes, dislikes });
+            updateStats();
+            renderVideoList();
+        }
+
+        function renderVideoList() {
+            const videoList = document.getElementById("video-list");
+            videoList.innerHTML = '';
+            videos.forEach(video => {
+                const listItem = document.createElement('li');
+                listItem.className = 'video-item';
+                listItem.innerHTML = `<strong>${video.name}</strong> - Views: ${video.views}, Likes: ${video.likes}, Dislikes: ${video.dislikes}`;
+                videoList.appendChild(listItem);
+            });
+        }
+    </script>
+</body>
+</html>
